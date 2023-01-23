@@ -1,105 +1,109 @@
-const users = []
 const fs = require('fs')
-
-require('fs').writeFile(
-
-    './users.json',
-
-    JSON.stringify(users),
-
-    function (err) {
-        if (err) {
-            console.error('error');
-        }
-    }
-)
-
 
 class ProductManager {
 
     constructor() {
-        this.path = "./user.json"
+        this.path = "./products.json"
         this.products = []
     }
 
-
-    getProducts = () => fs.existsSync(this.products)
-
-    getProductById = (idInput) => {
-        if ((this.products.find(({ id }) => id === idInput))) {
-            fs.existsSync(parseInt(this.products.find(({ id }) => id === idInput)))
-        }
-        else {
-            console.log("Not found")
-        }
-
-   }
-
-   // updateProduct = (idInput, data) => {
-   //     if ((this.products.find(({ id }) => id === idInput))) {
-   //         const toUpdate = (this.products.find(({ id }) => id === idInput))
-   //         const updated = { ...toUpdate, data }
-   //         console.log(updated)
-//
-//}
-  //      else {
-//console.log("Not found")
-  //      }
-
-
-   // }
+    getProducts = () => {
+        const productsDb = JSON.parse(fs.readFileSync(this.path))
+        return productsDb
+    }
 
     addProduct = (newProduct) => {
 
-        if ((this.products.find(({ code }) => code === newProduct.code))) {
-            console.log('producto con este code ya existe: es el siguiente:')
-            console.log(this.products.find(({ code }) => code === newProduct.code))
+        const productAd = this.products.find(({ code }) => code === newProduct.code)
 
-            
+        if (productAd) {
+            console.log('producto con este code ya existe')
+            return productAd
         } else {
 
-            if (newProduct.title && newProduct.description && newProduct.price && newProduct.code && newProduct.stock) {
+            if (newProduct["title" && "description" && "price" && "code" && "thumbnail" && "stock"]) {
 
 
                 if (this.products.length === 0) {
                     newProduct.id = 1
                 } else {
                     newProduct.id = this.products[this.products.length - 1].id + 1
-
-                    fs.appendFile.writeFile(JSON.stringify(newProduct.path, newProduct))
-                    console.log('Termino de escribir')
                 }
 
-
-            
-        }else{ console.log(" faltan datos") }
-    }
-}
-
-
-}
+                this.products.push(newProduct)
 
 
 
-getProductById = (idInput) => {
-    if ((this.products.find(({ id }) => id === idInput))) {
-        fs.unlinkSync((this.products.find(({ id }) => id === idInput)))
-    }
-    else {
-        console.log("Not found")
+                fs.writeFileSync(this.path, JSON.stringify(this.products, null, '\t'))
+
+            }
+
+            else {
+                console.log(" faltan datos")
+                return newProduct
+            }
+        }
     }
 
+    getProductById = (idInput) => {
 
+        const productsDb = JSON.parse(fs.readFileSync(this.path))
+        const productDb = productsDb.find(({ id }) => id === idInput)
+
+        if (!productDb) {
+            return "Not found"
+        }
+        return productDb
+    }
+
+
+    deleteProductById = (idInput) => {
+
+        const productsDb = JSON.parse(fs.readFileSync(this.path))
+        const productDb = productsDb.find(({ id }) => id === idInput)
+
+
+        if (!productDb) {
+            return "Not found"
+        }
+
+        const productIndex = productsDb.findIndex(({ id }) => id === idInput)
+
+
+        productsDb.splice(productIndex, 1)
+
+        fs.writeFileSync(this.path, JSON.stringify(productsDb, null, '\t'))
+
+    }
+
+    updateProductById = (idInput, key, value) => {
+
+        const productsDb = JSON.parse(fs.readFileSync(this.path))
+        const productDb = productsDb.find(({ id }) => id === idInput)
+
+
+        if (!productDb) {
+            return "Not found"
+        }
+
+
+        const productIndex = productsDb.findIndex(({ id }) => id === idInput)
+
+        const updated = { ...productDb }
+
+
+        updated.key = value
+
+        productsDb.splice(productIndex, 1)
+        productsDb.push(updated)
+        fs.writeFileSync(this.path, JSON.stringify(productsDb, null, '\t'))
+    }
 }
-
-
 
 
 const productManager = new ProductManager()
 
 
-
-// prueba agregar primer producto ok
 productManager.addProduct(
 
     {
@@ -108,11 +112,9 @@ productManager.addProduct(
         price: 500,
         thumbnail: "notiene",
         code: 265,
-        stock: 15,
-        id: 5,
+        stock: 50,
     })
 
-// prueba agregar segundo producto ok
 
 productManager.addProduct({
     title: "florero",
@@ -121,43 +123,30 @@ productManager.addProduct({
     thumbnail: "notiene",
     code: 658,
     stock: 15,
-    id: 6,
 })
 
-
-
-
-
-// prueba traer todos los productos
-
-productManager.getProducts()
-
-// prueba buscar productos por ID ok
-
-
-productManager.getProductById(idInput = 2)
-
-//prueba agregar producto con code repetido
-
-productManager.addProduct({
-    title: "florero",
-    description: "negro",
-    price: 500,
-    thumbnail: "notiene",
-    code: 658,
-    stock: 15,
-    id: 6,
-})
-
-//prueba agregar producto incompleto
 
 productManager.addProduct({
     title: "maceta",
-    description: "blanca",
+    description: "grande",
     price: 500,
     thumbnail: "notiene",
-    // code: 5,
-    id: 9,
+    code: 1234,
+    stock: 15,
 })
 
+
+
+productManager.getProducts()
+
+
+productManager.getProductById(idInput = 1)
+
+
+
+productManager.deleteProductById(idInput = 2)
+
+productManager.updateProductById(idInput = 1, key = "price", value = 50000000)
+
+productManager.getProducts()
 
